@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_backend__account_creation
+    columns:
+      - name: account_id
+        tests: &common_tests
+          - unique
+          - not_null
+          - dbt_utils.at_least_one
+  - name: stg_backend__account_closure
+    columns:
+      - name: account_id
+        tests: *common_tests          
+  - name: stg_backend__account_reopened
+    columns:
+      - name: account_id
+        tests: *common_tests               
+  - name: stg_backend__account_transactions
+    columns:
+      - name: account_date_id
+        tests: *common_tests          

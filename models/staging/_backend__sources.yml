@@ -1,0 +1,36 @@
+version: 2
+
+sources:
+
+- name: backend
+  description: >
+    backend data on account information. Each table is fully refreshed on 
+    a nightly basis from Monzo's append only logs. These logs are managed by Backend Engineers 
+    and will change over time as the backend systems changes.  
+  schema: monzo_datawarehouse
+  tables: 
+    - name: account_created
+      columns:
+        - name: account_id_hashed
+          tests: &common_tests
+            - unique
+            - not_null
+            - dbt_utils.at_least_one
+    - name: account_closed
+      tests:
+        - dbt_utils.unique_combination_of_columns:
+            config:
+              severity: warn        
+            combination_of_columns:
+              - account_id_hashed
+              - closed_ts          
+    - name: account_reopened
+      columns:
+        - name: account_id_hashed
+          tests: *common_tests          
+    - name: account_transactions
+      tests:
+        - dbt_utils.unique_combination_of_columns:
+            combination_of_columns:
+              - account_id_hashed
+              - date    
