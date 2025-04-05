@@ -1,0 +1,12 @@
+bank_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "analytics-take-home-test"
+      dataset: "monzo_nam"
+      threads: 8
+      timeout_second: 300
+      priority: interactive
+      location: US
