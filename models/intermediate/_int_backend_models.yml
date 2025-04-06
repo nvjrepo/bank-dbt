@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: int_backend__account_closed__deduplicated
+    columns:
+      - name: account_close_id
+        tests:
+          - unique
+          - not_null
+          - dbt_utils.at_least_one

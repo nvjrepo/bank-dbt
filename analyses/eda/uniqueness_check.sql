@@ -9,8 +9,7 @@ having count(*) > 1;
 
 --- sample 1 id of duplication
 select * from analytics-take-home-test.monzo_datawarehouse.account_closed a
-where account_id_hashed = '/2MJddh4HlScNeCHZUuk+LXrDCb1nif54L3iHrPJ9jIoTESdmFFEYe2IdRqLQDHT4IOH6x7ADX5jZrl0pCr4Pg=='
-
+where account_id_hashed = 'hrwoeW4c1jDKy9aCshm3tPBDJQTHXCcn6OAyDsO/iAOaIvRFsLSxY9SJSHh51yPoT3CDdFJLrbct+u5HKVcEDg=='
 
 -- account_reopened
 select
