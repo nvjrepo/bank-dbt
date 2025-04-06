@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: dim_accounts
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_backend__account_creation')    
+    columns:
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+        tests: &common_tests
+          - unique
+          - not_null
+          - dbt_utils.at_least_one
+  - name: dim_users 
+    columns:
+      - name: user_id
+        description: '{{ doc("user_id") }}'
+        tests: *common_tests
+  - name: fct_daily_accounts 
+    columns:
+      - name: event_id
+        description: Unique identifier of events, surrogate key of `date_day` and `account_id`
+        tests: *common_tests
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+        tests:
+          - relationships:
+              name: relationship_account_creation_closed
+              to: ref('dim_accounts')
+              field: account_id      
