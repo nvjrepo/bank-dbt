@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: int_backend__account_closed__deduplicated
+    description: >
+      Since there are rows with time differences between closing times for the same 
+      account are less than 1 second, the model performed deduplication by keeping 
+      closing events either WITHOUT other closing events for the same account, or 
+      the day differences between events need to be more than 0 
+    columns:
+      - name: account_closed_id
+        description: '{{ doc("account_closed_id") }}'
+        tests:
+          - unique
+          - not_null
+          - dbt_utils.at_least_one
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+      - name: account_closed_at
+        description: '{{ doc("closed_timestamp") }}'          
