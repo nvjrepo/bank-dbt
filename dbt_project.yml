@@ -30,3 +30,7 @@ models:
       +materialized: view
     intermediate:
       +materialized: ephemeral
+    marts:
+      +materialized: table 
+    reporting:
+      +materialized: table  
