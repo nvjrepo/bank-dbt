@@ -31,3 +31,7 @@ Date when the transaction occured
 {% docs transaction_number %}
 The number of transactions for the given account on the specific date
 {% enddocs %}
+
+{% docs account_close_id %}
+Unique identifier of account closure, surrogate of account_closed_at and account_id
+{% enddocs %}

@@ -25,7 +25,10 @@ sources:
         - name: user_id_hashed
           description: '{{ doc("user_id") }}'
     - name: account_closed 
-      description: information of account closure events
+      description: >
+        information of account closure events. the table currently has plenty of duplication issues,
+        such as duplication of all columns, the same account got multiple closed events with 1,2 second
+        differences. We hold off including tests for the tables until further improvements are introduced 
       columns: 
         - name: account_id_hashed
           description: '{{ doc("account_id") }}'        

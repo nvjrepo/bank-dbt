@@ -20,7 +20,7 @@ models:
     description: staging layer for account closing events
     columns:
       - name: account_closed_id
-        description: unique identifier of account closure, surrogate of account_closed_at and account_id
+        description: '{{ doc("account_close_id") }}'
         tests: *common_tests
       - name: account_id
         description: '{{ doc("account_id") }}'
