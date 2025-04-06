@@ -2,21 +2,69 @@ version: 2
 
 models:
   - name: stg_backend__account_creation
+    description: staging layer for account creation events
     columns:
       - name: account_id
+        description: '{{ doc("account_id") }}'
         tests: &common_tests
           - unique
           - not_null
           - dbt_utils.at_least_one
+      - name: user_id
+        description: '{{ doc("user_id") }}'           
+      - name: account_created_at
+        description: '{{ doc("created_timestamp") }}'
+      - name: account_type
+        description: '{{ doc("account_type") }}'         
   - name: stg_backend__account_closure
+    description: staging layer for account closing events
     columns:
+      - name: account_closed_id
+        description: unique identifier of account closure, surrogate of account_closed_at and account_id
+        tests: *common_tests
       - name: account_id
-        tests: *common_tests          
+        description: '{{ doc("account_id") }}'
+        tests:
+          - relationships:
+              name: relationship_account_creation_closed
+              to: ref('stg_backend__account_creation')
+              field: account_id
+      - name: account_closed_at
+        description: '{{ doc("closed_timestamp") }}'              
   - name: stg_backend__account_reopened
+    description: staging layer for account reopening events
     columns:
       - name: account_id
-        tests: *common_tests               
+        description: '{{ doc("account_id") }}'
+        tests:
+          - unique
+          - not_null
+          - dbt_utils.at_least_one
+          - relationships:
+              name: relationship_account_creation_reopened
+              to: ref('stg_backend__account_creation')
+              field: account_id
+          # ensure all reopened accounts were closed before
+          - relationships:
+              name: relationship_account_closed_reopened
+              to: ref('stg_backend__account_closure')
+              field: account_id
+      - name: account_reopened_at
+        description: '{{ doc("reopened_timestamp") }}'                  
   - name: stg_backend__account_transactions
+    description: staging layer for number of daily transactions per account
     columns:
       - name: account_date_id
-        tests: *common_tests          
+        description: surrogate key of `account_id` and `transaction_date`
+        tests: *common_tests
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+        tests:
+          - relationships:
+              name: relationship_account_creation_transactions
+              to: ref('stg_backend__account_creation')
+              field: account_id        
+      - name: transaction_created_date
+        description: '{{ doc("transaction_date") }}'   
+      - name: number_of_transactions
+        description: '{{ doc("transaction_number") }}'       

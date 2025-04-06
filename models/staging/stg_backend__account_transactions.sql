@@ -1,10 +1,3 @@
-{{ 
-    config(
-        materialized='incremental',
-        unique_key='account_date_id'
-    )
-}}
-
 with source as (
     select * from {{ source('backend', 'account_transactions') }}
 

@@ -4,33 +4,52 @@ sources:
 
 - name: backend
   description: >
-    backend data on account information. Each table is fully refreshed on 
-    a nightly basis from Monzo's append only logs. These logs are managed by Backend Engineers 
+    backend data on account information. Each table is fully refreshed on a nightly 
+    basis from Monzo's append only logs. These logs are managed by Backend Engineers 
     and will change over time as the backend systems changes.  
   schema: monzo_datawarehouse
   tables: 
     - name: account_created
+      description: information of account creation
       columns:
         - name: account_id_hashed
+          description: '{{ doc("account_id") }}'
           tests: &common_tests
             - unique
             - not_null
             - dbt_utils.at_least_one
-    - name: account_closed
-      tests:
-        - dbt_utils.unique_combination_of_columns:
-            config:
-              severity: warn        
-            combination_of_columns:
-              - account_id_hashed
-              - closed_ts          
+        - name: created_ts
+          description: '{{ doc("created_timestamp") }}'
+        - name: account_type
+          description: '{{ doc("account_type") }}'
+        - name: user_id_hashed
+          description: '{{ doc("user_id") }}'
+    - name: account_closed 
+      description: information of account closure
+      columns: 
+        - name: account_id_hashed
+          description: '{{ doc("account_id") }}'        
+        - name: closed_ts
+          description: '{{ doc("closed_timestamp") }}'                      
     - name: account_reopened
+      description: information of account reopening
       columns:
         - name: account_id_hashed
-          tests: *common_tests          
+          description: '{{ doc("account_id") }}'        
+          tests: *common_tests    
+        - name: reopened_ts
+          description: '{{ doc("reopened_timestamp") }}'             
     - name: account_transactions
+      description: information of number of transactions per day by accounts
       tests:
         - dbt_utils.unique_combination_of_columns:
             combination_of_columns:
               - account_id_hashed
               - date    
+      columns:
+        - name: account_id_hashed
+          description: '{{ doc("account_id") }}'        
+        - name: date
+          description: '{{ doc("transaction_date") }}'   
+        - name: transactions_num
+          description: '{{ doc("transaction_number") }}'       

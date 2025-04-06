@@ -1,10 +1,3 @@
-{{ 
-    config(
-        materialized='table',
-        unique_key='account_id'
-    )
-}}
-
 with source as (
     select * from {{ source('backend', 'account_reopened') }}
 
