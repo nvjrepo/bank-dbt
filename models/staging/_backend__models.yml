@@ -17,7 +17,10 @@ models:
       - name: account_type
         description: '{{ doc("account_type") }}'         
   - name: stg_backend__account_closure
-    description: staging layer for account closing events
+    description: >
+      staging layer for account closing events. An account can be closed more
+      than 1 time, either as requested by customers, or by Monzo to avoid 
+      fraudulent activities
     columns:
       - name: account_closed_id
         description: '{{ doc("account_closed_id") }}'
