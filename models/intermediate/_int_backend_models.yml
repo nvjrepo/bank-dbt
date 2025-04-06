@@ -8,8 +8,8 @@ models:
       closing events either WITHOUT other closing events for the same account, or 
       the day differences between events need to be more than 0 
     columns:
-      - name: account_close_id
-        description: '{{ doc("account_close_id") }}'
+      - name: account_closed_id
+        description: '{{ doc("account_closed_id") }}'
         tests:
           - unique
           - not_null
