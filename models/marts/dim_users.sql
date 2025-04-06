@@ -12,4 +12,4 @@ users as (
 
 )
 
-select * from final
+select * from users

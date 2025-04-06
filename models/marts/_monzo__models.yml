@@ -2,6 +2,7 @@ version: 2
 
 models:
   - name: dim_accounts
+    description: descriptive attributes, and lifecycle information of account
     tests:
       - dbt_utils.equal_rowcount:
           compare_model: ref('stg_backend__account_creation')    
@@ -12,12 +13,41 @@ models:
           - unique
           - not_null
           - dbt_utils.at_least_one
-  - name: dim_users 
+      - name: user_id
+        description: '{{ doc("user_id") }}'
+      - name: account_type
+        description: '{{ doc("account_type") }}'
+      - name: number_of_closed_attempts
+        description: Number of up-to-date closed attempts for a given accounts
+      - name: first_closed_at
+        description: Timestamp when the account closed for the first time
+      - name: last_closed_at
+        description: Timestamp when the account closed for the last time
+      - name: reopened_at
+        description: '{{ doc("reopened_timestamp") }}'                  
+      - name: number_of_transactions
+        description: Number of up-to-date transactions for a given accounts
+      - name: first_transaction_date
+        description: Date when first transaction occured for a givent account        
+      - name: last_transaction_date
+        description: Date when first transaction occured for a givent account
+      - name: account_status
+        description: Status of the account, determined by its lattest stage in the lifecycle
+  - name: dim_users
+    description: descriptive attributes, and aggregated information of users
     columns:
       - name: user_id
         description: '{{ doc("user_id") }}'
         tests: *common_tests
+      - name: first_account_created_at
+        description: Timestamp when the user created an account for the first time at Monzo
+  - name: dim_dates
+    description: descriptive attributes of dates
+    columns:
+      - name: date_day
+        description: dates in the date sequence       
   - name: fct_daily_accounts 
+    description: represent life cycle activities of all accounts, from opening, closure to reopening by tracking account status on daily basis
     columns:
       - name: event_id
         description: Unique identifier of events, surrogate key of `date_day` and `account_id`
@@ -28,4 +58,12 @@ models:
           - relationships:
               name: relationship_account_creation_closed
               to: ref('dim_accounts')
-              field: account_id      
+              field: account_id
+      - name: user_id
+        description: '{{ doc("user_id") }}'
+      - name: date_day
+        description: dates to monitor activities of the account         
+      - name: number_of_transactions
+        description: Number of up-to-date transactions for a given accounts at specific date        
+      - name: account_status
+        description: Status of the account, determined by its stage in the lifecycle at specific date

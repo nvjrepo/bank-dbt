@@ -40,8 +40,8 @@ select
     closed.last_closed_at,
     reopened.account_reopened_at as reopened_at,
     transactions.number_of_transactions,
-    transactions.last_transaction_date,
     transactions.first_transaction_date,
+    transactions.last_transaction_date,
 
     case
         when reopened.account_id is not null then 'active'

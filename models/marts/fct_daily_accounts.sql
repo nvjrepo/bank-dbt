@@ -77,9 +77,12 @@ joined as (
 
 final as (
     select
-        joined.*,
+        {{ dbt_utils.generate_surrogate_key(['joined.date_day', 'joined.account_id']) }} as event_id,
+        joined.account_id,
         created.user_id,
-        {{ dbt_utils.generate_surrogate_key(['joined.date_day', 'joined.account_id']) }} as event_id
+        joined.date_day,
+        joined.number_of_transactions,
+        joined.account_status
 
     from joined
     inner join created
