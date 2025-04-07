@@ -34,7 +34,7 @@ models:
               field: account_id
       - name: account_closed_at
         description: '{{ doc("closed_timestamp") }}'              
-  - name: stg_backend__account_reopened
+  - name: stg_backend__account_reopening
     description: staging layer for account reopening events
     columns:
       - name: account_id
