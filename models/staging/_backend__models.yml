@@ -3,42 +3,59 @@ version: 2
 models:
   - name: stg_backend__account_creation
     description: staging layer for account creation events
+    config:
+      contract:
+        enforced: true    
     columns:
       - name: account_id
         description: '{{ doc("account_id") }}'
+        data_type: string
         tests: &common_tests
           - unique
           - not_null
           - dbt_utils.at_least_one
       - name: user_id
-        description: '{{ doc("user_id") }}'           
+        description: '{{ doc("user_id") }}'
+        data_type: string                
       - name: account_created_at
         description: '{{ doc("created_timestamp") }}'
+        data_type: timestamp        
       - name: account_type
-        description: '{{ doc("account_type") }}'         
+        description: '{{ doc("account_type") }}' 
+        data_type: string                
   - name: stg_backend__account_closure
     description: >
       staging layer for account closing events. An account can be closed more
       than 1 time, either as requested by customers, or by Monzo to avoid 
       fraudulent activities
+    config:
+      contract:
+        enforced: true       
     columns:
       - name: account_closed_id
         description: '{{ doc("account_closed_id") }}'
+        data_type: string          
         tests: *common_tests
       - name: account_id
         description: '{{ doc("account_id") }}'
+        data_type: string        
         tests:
           - relationships:
               name: relationship_account_creation_closed
               to: ref('stg_backend__account_creation')
               field: account_id
       - name: account_closed_at
-        description: '{{ doc("closed_timestamp") }}'              
+        description: '{{ doc("closed_timestamp") }}'  
+        data_type: timestamp
   - name: stg_backend__account_reopening
     description: staging layer for account reopening events
+    config:
+      contract:
+        enforced: true     
     columns:
       - name: account_id
         description: '{{ doc("account_id") }}'
+        data_type: string        
         tests:
           - unique
           - not_null
@@ -53,21 +70,29 @@ models:
               to: ref('stg_backend__account_closure')
               field: account_id
       - name: account_reopened_at
-        description: '{{ doc("reopened_timestamp") }}'                  
+        description: '{{ doc("reopened_timestamp") }}'
+        data_type: timestamp                          
   - name: stg_backend__account_transactions
     description: staging layer for number of daily transactions per account
+    config:
+      contract:
+        enforced: true     
     columns:
       - name: account_date_id
         description: surrogate key of `account_id` and `transaction_date`
+        data_type: string        
         tests: *common_tests
       - name: account_id
         description: '{{ doc("account_id") }}'
+        data_type: string        
         tests:
           - relationships:
               name: relationship_account_creation_transactions
               to: ref('stg_backend__account_creation')
               field: account_id        
       - name: transaction_created_date
-        description: '{{ doc("transaction_date") }}'   
+        description: '{{ doc("transaction_date") }}'  
+        data_type: date         
       - name: number_of_transactions
-        description: '{{ doc("transaction_number") }}'       
+        description: '{{ doc("transaction_number") }}' 
+        data_type: int              

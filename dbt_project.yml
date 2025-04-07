@@ -26,6 +26,9 @@ clean-targets:
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 models:
   bank_dbt:
+    +persist_docs:
+      relation: true
+      columns: true  
     staging:
       +materialized: view
     intermediate:
@@ -34,3 +37,6 @@ models:
       +materialized: table 
     reporting:
       +materialized: table  
+
+tests:
+  +store_failures: true

@@ -2,6 +2,7 @@
     config(
         materialized='incremental',
         unique_key='event_id',
+        on_schema_change='fail',
         partition_by={
             "field": "date_day",
             "data_type": "datetime",
@@ -22,7 +23,7 @@ created as (
         *,
         cast(created_at as date) as account_started_date,
         case
-            when reopened_at > last_closed_at then current_date
+            when reopened_at is not null then current_date
             else coalesce(cast(last_closed_at as date), current_date)
         end as account_ended_date
     from {{ ref('dim_accounts') }}
