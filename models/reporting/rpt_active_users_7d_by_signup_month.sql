@@ -1,19 +1,16 @@
 {%- set reporting_date = '2020-06-08' -%}
 
 with users as (
-    select distinct user_id
-    from {{ ref('fct_daily_accounts') }}
-    where
-        account_status = 'active'
-        and date_day =  '{{ reporting_date }}'
-),
+    select
+        user_id,
+        account_status = 'active' as is_total_account,
+        account_status = 'active' 
+            and number_of_transactions is not null
+        as is_active_accounts
 
-active_users as (
-    select distinct user_id
     from {{ ref('fct_daily_accounts') }}
-    where
-        number_of_transactions is not null
-        and date_day between '{{ reporting_date }}' - 6 and '{{ reporting_date }}'
+    where date_day between '{{ reporting_date }}' - 6 and '{{ reporting_date }}'
+
 ),
 
 dim as (
@@ -22,19 +19,25 @@ dim as (
 
 select 
     cast(date_trunc(dim.first_account_created_at, month) as date) as first_account_signup_month,
-    count(*) as total_7days_users,
-    count(active_users.user_id) as total_7days_active_users,
+    count(distinct 
+        case 
+            when users.is_total_account then users.user_id 
+        end
+    ) as total_7days_users,
+    count(distinct 
+        case 
+            when users.is_active_accounts then users.user_id 
+        end
+    ) as total_7days_active_users,
     round(
         safe_divide(
-            count(active_users.user_id),
-            count(*)
+            count(distinct case when users.is_active_accounts then users.user_id end),
+            count(distinct case when users.is_total_account then users.user_id end)
         ),
         4
     ) as active_users_7days_percentage
 
 from users
-left join active_users
-    on users.user_id = active_users.user_id
 inner join dim
     on users.user_id = dim.user_id
 {{ dbt_utils.group_by(1) }}

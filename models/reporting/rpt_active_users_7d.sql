@@ -1,32 +1,36 @@
 {%- set reporting_date = '2020-01-04' -%}
 
 with users as (
-    select distinct user_id
-    from {{ ref('fct_daily_accounts') }}
-    where
+    select
+        user_id,
+        account_status = 'active' as is_total_account,
         account_status = 'active'
-        and date_day =  '{{ reporting_date }}'
-),
-
-active_users as (
-    select distinct user_id
+            and number_of_transactions is not null
+        as is_active_accounts
+ 
     from {{ ref('fct_daily_accounts') }}
-    where
-        number_of_transactions is not null
-        and date_day between '{{ reporting_date }}' - 6 and '{{ reporting_date }}'
+    where date_day between '{{ reporting_date }}' - 6 and '{{ reporting_date }}'
+
 )
 
+
 select 
-    count(*) as total_7days_users,
-    count(active_users.user_id) as total_7days_active_users,
+    count(distinct
+        case
+            when is_total_account then user_id
+        end
+    ) as total_7days_users,
+    count(distinct
+        case
+            when is_active_accounts then user_id
+        end
+    ) as total_7days_active_users,
     round(
         safe_divide(
-            count(active_users.user_id),
-            count(*)
+            count(distinct case when is_active_accounts then user_id end),
+            count(distinct case when is_total_account then user_id end)
         ),
         4
     ) as active_users_7days_percentage
 
 from users
-left join active_users
-    on users.user_id = active_users.user_id
