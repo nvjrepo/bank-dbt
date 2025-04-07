@@ -34,7 +34,7 @@ closed as (
 ),
 
 reopened as (
-    select * from {{ ref('stg_backend__account_reopened') }}
+    select * from {{ ref('stg_backend__account_reopening') }}
 
 ),
 
