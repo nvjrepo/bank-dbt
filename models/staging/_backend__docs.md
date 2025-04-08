@@ -10,11 +10,9 @@ A hashed unique identifie of the user ID
 Type of the account (retail, business, etc.)
 {% enddocs %}
 
-
 {% docs created_timestamp %}
 Timestamp when the account was created
 {% enddocs %}
-
 
 {% docs closed_timestamp %}
 Timestamp when the account was closed 

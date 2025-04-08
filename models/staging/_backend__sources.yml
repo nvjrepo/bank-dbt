@@ -4,13 +4,13 @@ sources:
 
 - name: backend
   description: >
-    backend data on account information. Each table is fully refreshed on a nightly 
+    Backend data on account information. Each table is fully refreshed on a nightly 
     basis from Monzo's append only logs. These logs are managed by Backend Engineers 
     and will change over time as the backend systems changes.  
   schema: monzo_datawarehouse
   tables: 
     - name: account_created
-      description: information of account creation events
+      description: Information of account creation events
       columns:
         - name: account_id_hashed
           description: '{{ doc("account_id") }}'
@@ -26,16 +26,16 @@ sources:
           description: '{{ doc("user_id") }}'
     - name: account_closed 
       description: >
-        information of account closure events. the table currently has plenty of duplication issues,
-        such as duplication of all columns, the same account got multiple closed events with 1,2 second
-        differences. We hold off including tests for the tables until further improvements are introduced 
+        Information of account closure events. The table currently has plenty of duplication issues,
+        such as duplication in values of all columns, the same account got multiple closed events with 1,2
+        differences in second. We held off adding tests for the tables until further improvements are introduced
       columns: 
         - name: account_id_hashed
           description: '{{ doc("account_id") }}'        
         - name: closed_ts
           description: '{{ doc("closed_timestamp") }}'                      
     - name: account_reopened
-      description: information of account reopening events
+      description: Information of account reopening events
       columns:
         - name: account_id_hashed
           description: '{{ doc("account_id") }}'        
@@ -43,7 +43,7 @@ sources:
         - name: reopened_ts
           description: '{{ doc("reopened_timestamp") }}'             
     - name: account_transactions
-      description: information of number of transactions per day by accounts
+      description: Information of number of transactions per day by accounts
       tests:
         - dbt_utils.unique_combination_of_columns:
             combination_of_columns:

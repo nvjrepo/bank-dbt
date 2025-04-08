@@ -1,0 +1,23 @@
+version: 2
+
+models:
+  - name: rpt_active_users_7d
+    description: Metrics for active users in 7-day period
+    columns:
+      - name: total_7days_users
+        description: Total users with at least 1 opened account in 7 day period
+      - name: total_7days_active_users
+        description: Total users with at least 1 transaction in 7 day period
+      - name: active_users_7days_percentage
+        description: Percentage of total_7days_active_users out of total_7days_users
+  - name: rpt_active_users_7d_by_signup_month
+    description: Metrics for active users in 7-day period, aggregated by signup month cohort
+    columns:
+      - name: first_account_signup_month
+        description: Signup month of the first account for a given customer
+      - name: total_7days_users
+        description: Total users with at least 1 opened account in 7 day period
+      - name: total_7days_active_users
+        description: Total users with at least 1 transaction in 7 day period
+      - name: active_users_7days_percentage
+        description: Percentage of total_7days_active_users out of total_7days_users    

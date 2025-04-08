@@ -1,0 +1,120 @@
+version: 2
+
+models:
+  - name: dim_accounts
+    description: descriptive attributes, and lifecycle information of account
+    config:
+      contract:
+        enforced: true    
+    tests:
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_backend__account_creation')
+      - dbt_utils.expression_is_true:
+          expression: "cast(last_closed_at as date) >= last_transaction_date"
+          config:
+            where: "last_transaction_date is not null and last_closed_at is not null"                    
+    columns:
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+        data_type: string
+        tests: &common_tests
+          - unique
+          - not_null
+          - dbt_utils.at_least_one
+      - name: user_id
+        description: '{{ doc("user_id") }}'   
+        data_type: string            
+      - name: account_type
+        description: '{{ doc("account_type") }}'
+        data_type: string        
+      - name: created_at
+        description: '{{ doc("created_timestamp") }}'  
+        data_type: timestamp              
+      - name: number_of_closed_attempts
+        description: Number of up-to-date closed attempts for a given accounts
+        data_type: int        
+      - name: first_closed_at
+        description: Timestamp when the account closed for the first time
+        data_type: timestamp        
+      - name: last_closed_at
+        description: Timestamp when the account closed for the last time
+        data_type: timestamp        
+      - name: last_closed_before_reopened_at
+        description: >
+          Timestamp when the account was closed for the last time before being reopened.
+          The logic created closed-reopening period to pair closing with reopening events
+        data_type: timestamp        
+      - name: reopened_at
+        description: '{{ doc("reopened_timestamp") }}'
+        data_type: timestamp                        
+      - name: number_of_transactions
+        description: Number of up-to-date transactions for a given accounts
+        data_type: int        
+      - name: first_transaction_date
+        description: Date when first transaction occured for a givent account
+        data_type: date             
+      - name: last_transaction_date
+        description: Date when first transaction occured for a givent account
+        data_type: date        
+      - name: account_status
+        description: >
+          Status of the account, determined by its lattest stage in the lifecycle:
+          - if the account was closed and reopened at the same date, the account was "active"
+            on that day if it was closed BEFORE being reopened, otherwise, the status would be "closed"
+          - if date_day fell within the range of "last closed timestamp before reopening"
+            and "reopening" events => closed            
+          - if date_day matched account closing date => the status was "closed" 
+            for that day and "active" the next date, in case it was not the last 
+            closing event, or followed up by reopening events
+        data_type: string        
+  - name: dim_users
+    description: descriptive attributes, and aggregated information of users
+    config:
+      contract:
+        enforced: true    
+    columns:
+      - name: user_id
+        description: '{{ doc("user_id") }}'
+        data_type: string        
+        tests: *common_tests
+      - name: first_account_created_at
+        description: Timestamp when the user created an account for the first time at Monzo
+        data_type: timestamp        
+  - name: dim_dates
+    description: descriptive attributes of dates
+    config:
+      contract:
+        enforced: true    
+    columns:
+      - name: date_day
+        description: dates in the date sequence
+        data_type: date           
+  - name: fct_daily_accounts 
+    description: monitor activities of all accounts on daily basis, determined account status for every given date
+    config:
+      contract:
+        enforced: true    
+    columns:
+      - name: event_id
+        description: Unique identifier of events, surrogate key of `date_day` and `account_id`
+        data_type: string        
+        tests: *common_tests
+      - name: account_id
+        description: '{{ doc("account_id") }}'
+        data_type: string        
+        tests:
+          - relationships:
+              to: ref('dim_accounts')
+              field: account_id
+      - name: user_id
+        description: '{{ doc("user_id") }}'
+        data_type: string        
+      - name: date_day
+        description: dates to monitor activities of the account
+        data_type: date               
+      - name: number_of_transactions
+        description: Number of up-to-date transactions for a given accounts at specific date
+        data_type: int        
+      - name: account_status
+        description: Status of the account, determined by its stage in the lifecycle at specific date
+        data_type: string        

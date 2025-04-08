@@ -22,11 +22,25 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+# Configuring project variable
+vars:
+  7_period_reporting_end_date: '2020-06-08'
+
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 models:
   bank_dbt:
+    +persist_docs:
+      relation: true
+      columns: true  
     staging:
       +materialized: view
     intermediate:
       +materialized: ephemeral
+    marts:
+      +materialized: table 
+    reporting:
+      +materialized: table  
+
+tests:
+  +store_failures: true
