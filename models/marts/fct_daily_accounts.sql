@@ -64,7 +64,7 @@ final as (
         daily_accounts.date_day,
         coalesce(transactions.number_of_transactions, 0) as number_of_transactions,
         case
-            when date(created.reopened_at) = date(closed.account_closed_at)
+            when cast(created.reopened_at as date) = cast(closed.account_closed_at as date)
                 then
                     -- if reopening and closing events happen in the same date,
                     -- the account is "active" only when it was reopened AFTER being closed
@@ -73,6 +73,7 @@ final as (
                         else 'closed'
                     end
             when daily_accounts.date_day between cast(created.last_closed_before_reopened_at as date) and cast(created.reopened_at as date) - 1 then 'closed'            
+            when date_day = cast(closed.account_closed_at as date) then 'closed'
             else 'active' 
         end as account_status
 

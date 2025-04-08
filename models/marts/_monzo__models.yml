@@ -39,6 +39,11 @@ models:
       - name: last_closed_at
         description: Timestamp when the account closed for the last time
         data_type: timestamp        
+      - name: last_closed_before_reopened_at
+        description: >
+          Timestamp when the account is closed for the last time before being reopened.
+          The logic create closed-reopening period to pair exact closing with reopening events
+        data_type: timestamp        
       - name: reopened_at
         description: '{{ doc("reopened_timestamp") }}'
         data_type: timestamp                        
@@ -52,7 +57,15 @@ models:
         description: Date when first transaction occured for a givent account
         data_type: date        
       - name: account_status
-        description: Status of the account, determined by its lattest stage in the lifecycle
+        description: >
+          Status of the account, determined by its lattest stage in the lifecycle:
+          - if the account is closed and reopened at the same date, the account is "active"
+            on that day if it was closed BEFORE being reopened, otherwise, "closed"
+          - if date_day locates in the range of "last closed timestamp before reopening"
+            and "reopening" events => closed            
+          - if date_day fall into account closing date => "closed" for that day 
+            and "active" the next date, if it is not the last closed, 
+            or followed up by reopening events
         data_type: string        
   - name: dim_users
     description: descriptive attributes, and aggregated information of users
@@ -75,7 +88,7 @@ models:
     columns:
       - name: date_day
         description: dates in the date sequence
-        data_type: datetime           
+        data_type: date           
   - name: fct_daily_accounts 
     description: represent life cycle activities of all accounts, from opening, closure to reopening by tracking account status on daily basis
     config:
@@ -98,7 +111,7 @@ models:
         data_type: string        
       - name: date_day
         description: dates to monitor activities of the account
-        data_type: datetime               
+        data_type: date               
       - name: number_of_transactions
         description: Number of up-to-date transactions for a given accounts at specific date
         data_type: int        
