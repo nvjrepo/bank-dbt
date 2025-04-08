@@ -3,10 +3,11 @@ version: 2
 models:
   - name: int_backend__account_closed__deduplicated
     description: >
-      Since there are rows with time differences between closing times for the same 
-      account are less than 1 second, the model performed deduplication by keeping 
-      closing events either WITHOUT other closing events for the same account, or 
-      the day differences between events need to be more than 0 
+      Since there were cases time differences between closing times for the same 
+      account was less than 1 minute, the model performed deduplication by keeping 
+      closing events:
+        - Unique for a given account
+        - Differences in day between closing events need to be more than 0 for the same account 
     config:
       contract:
         enforced: true      
