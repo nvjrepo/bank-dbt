@@ -22,6 +22,10 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+# Configuring project variable
+vars:
+  7_period_reporting_end_date: '2020-06-08'
+
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 models:
