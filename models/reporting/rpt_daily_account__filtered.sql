@@ -10,7 +10,7 @@ select
     account_status = 'active' as is_total_account,
     -- checking whether the filtered account have any transactions during that day
     account_status = 'active' 
-    and number_of_transactions is not null
+    and number_of_transactions > 0
         as is_active_accounts
 
 from {{ ref('fct_daily_accounts') }}

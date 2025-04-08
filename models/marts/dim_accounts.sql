@@ -3,13 +3,17 @@ with created as (
 ),
 
 closed as (
+    select * from {{ ref('int_backend__account_closed__deduplicated') }}
+),
+
+closed_agg as (
     select
         account_id,
         count(*) as number_of_closed_attempts,
         min(account_closed_at) as first_closed_at,
         max(account_closed_at) as last_closed_at
 
-    from {{ ref('int_backend__account_closed__deduplicated') }}
+    from closed
     {{ dbt_utils.group_by(1) }}
 
 ),
@@ -30,11 +34,28 @@ transactions_agg as (
         max(transactions.transaction_created_date) as last_transaction_date
 
     from transactions
-    left join closed
-        on transactions.account_id = closed.account_id
-    where transactions.transaction_created_date <= cast(closed.last_closed_at as date)
+    left join closed_agg
+        on transactions.account_id = closed_agg.account_id
+    -- accounts should not have transactions after being closed
+    where transactions.transaction_created_date <= cast(closed_agg.last_closed_at as date)
     {{ dbt_utils.group_by(1) }}
 
+),
+
+reopened_closed_joined as (
+    select
+        reopened.account_id,
+        reopened.account_reopened_at,
+        closed.account_closed_at as last_closed_before_reopened_at
+
+    from closed
+    inner join reopened
+        on closed.account_id = reopened.account_id
+    where reopened.account_reopened_at >= closed.account_closed_at
+    qualify row_number() over (
+        partition by closed.account_id 
+        order by date_diff(reopened.account_reopened_at, closed.account_closed_at, millisecond)
+    ) = 1 
 )
 
 select
@@ -42,24 +63,25 @@ select
     created.user_id,
     created.account_type,
     created.account_created_at as created_at,
-    closed.number_of_closed_attempts,
-    closed.first_closed_at,
-    closed.last_closed_at,
-    reopened.account_reopened_at as reopened_at,
+    closed_agg.number_of_closed_attempts,
+    closed_agg.first_closed_at,
+    closed_agg.last_closed_at,
+    reopened_closed_joined.last_closed_before_reopened_at,
+    reopened_closed_joined.account_reopened_at as reopened_at,
     transactions_agg.number_of_transactions,
     transactions_agg.first_transaction_date,
     transactions_agg.last_transaction_date,
 
     case
-        when reopened.account_id is not null then 'active'
-        when closed.account_id is not null then 'closed'
+        when reopened_closed_joined.account_id is not null then 'active'
+        when closed_agg.account_id is not null then 'closed'
         else 'active'
     end as account_status
 
 from created
-left join closed
-    on created.account_id = closed.account_id
-left join reopened
-    on created.account_id = reopened.account_id
+left join closed_agg
+    on created.account_id = closed_agg.account_id
+left join reopened_closed_joined
+    on created.account_id = reopened_closed_joined.account_id
 left join transactions_agg
     on created.account_id = transactions_agg.account_id
