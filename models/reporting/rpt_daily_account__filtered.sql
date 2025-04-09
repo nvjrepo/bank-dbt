@@ -4,14 +4,28 @@
     ) 
 }}
 
-select
-    user_id,
-    -- checking whether the account was active during that day
-    account_status = 'active' as is_total_account,
-    -- checking whether the filtered account have any transactions during that day
-    account_status = 'active' 
-    and number_of_transactions > 0
-        as is_active_accounts
+with filtered_accounts as (
+    select * from {{ ref('fct_daily_accounts') }}
+    where date_day between '{{ var("7_period_reporting_end_date") }}' - 6 and '{{ var("7_period_reporting_end_date") }}'
 
-from {{ ref('fct_daily_accounts') }}
-where date_day between '{{ var("7_period_reporting_end_date") }}' - 6 and '{{ var("7_period_reporting_end_date") }}'
+),
+
+users as (
+    select distinct user_id from filtered_accounts
+    where account_status = 'active'
+
+),
+
+active_users as (
+    select distinct user_id from filtered_accounts
+    where number_of_transactions > 0
+
+)
+
+select
+    users.user_id,
+    active_users.user_id is not null as is_active_user
+ 
+from users
+left join active_users
+    on users.user_id = active_users.user_id

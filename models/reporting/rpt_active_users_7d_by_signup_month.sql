@@ -9,25 +9,15 @@ dim as (
 
 select 
     cast(date_trunc(dim.first_account_created_at, month) as date) as first_account_signup_month,
-    count(
-        distinct 
-        case 
-            when users.is_total_account then users.user_id 
-        end
-    ) as total_7days_users,
-    count(
-        distinct 
-        case 
-            when users.is_active_accounts then users.user_id 
-        end
-    ) as total_7days_active_users,
+    count(*) as total_7days_users,
+    count(case when users.is_active_user then users.user_id end) as total_7days_active_users,
     round(
         safe_divide(
-            count(distinct case when users.is_active_accounts then users.user_id end),
-            count(distinct case when users.is_total_account then users.user_id end)
+            count(case when users.is_active_user then users.user_id end),
+            count(*)
         ),
         4
-    ) as active_users_7days_percentage
+    ) as active_users_7days_percentage    
 
 from users
 inner join dim
