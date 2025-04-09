@@ -20,7 +20,7 @@ checked as (
         and daily_accounts.account_status = 'closed'
         and daily_accounts.number_of_transactions != 0
         and daily_accounts.date_day 
-        != cast(daily_accounts.last_closed_before_reopened_at as date)
+        != cast(accounts.last_closed_before_reopened_at as date)
 )
 
 select * from checked
