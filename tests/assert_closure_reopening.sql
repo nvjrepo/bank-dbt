@@ -1,3 +1,5 @@
+{# /* The assertion is to ensure an account cannot be closed and reopened at the same time */ #}
+
 with closure as (
     select * from {{ ref('stg_backend__account_closure') }}
 ),
